@@ -12,31 +12,43 @@
 <body>
   
   <div class="container mt-5 " style="height: 800px;">
-    <h1 class="text-center">To-Do List</h1>
+     <!-- User Icon -->
+     <div class="text-center mt-3">
+      <img src="{% static 'images/Sample_User_Icon.png' %}" class="rounded-circle" width="80" height="80" alt="User Icon">
+    </div>
+
+    <h1 class="text-center ">To-Do List</h1>
 
     <!-- Form Section -->
     <form id="todo-form" class="d-flex gap-2 mt-4">
+      
         {% csrf_token %}
         <input id="input" name="input" type="text" class="form-control" placeholder="Add a new task..." required>
         <input type="date" id="date" name="date" class="form-control">
         <button type="button" onclick="addTask()" class="btn btn-primary">+</button>
     </form>
 
-    <!-- User Icon -->
-    <div class="text-center mt-3">
-        <img src="{% static 'images/Sample_User_Icon.png' %}" class="rounded-circle" width="80" height="80" alt="User Icon">
-    </div>
-
+   
     <!-- Task List -->
     <div class="mt-4">
         {% for x in data %}
         <div class="d-flex justify-content-between align-items-center p-2 border rounded bg-light my-2">
+          {%if x.done %}
+            <h5 class="mb-0 line-through">{{ x.task}}</h5>
+            <h6 class="text-muted mb-0">{{ x.date }}</h6>
+            <div>
+              <button onclick="taskUndone('{{ x.sino }}')" class="btn btn-sm btn-success done">&#10004;</button>
+              <button onclick="taskDelete('{{x.sino}}')" class="btn btn-sm btn-danger delete">✗</button>
+          </div>
+            {% else %}
             <h5 class="mb-0">{{ x.task }}</h5>
             <h6 class="text-muted mb-0">{{ x.date }}</h6>
             <div>
-                <button class="btn btn-sm btn-success done">✓</button>
-                <button class="btn btn-sm btn-danger delete">✗</button>
-            </div>
+              <button onclick="taskDone('{{ x.sino }}')" class="btn btn-sm btn-success done">&#10004;</button>
+              <button onclick="taskDelete('{{x.sino}}')" class="btn btn-sm btn-danger delete">✗</button>
+          </div>
+            {% endif %}
+            
         </div>
         {% endfor %}
     </div>
@@ -48,6 +60,8 @@
 
 
 <script>
+
+  document.getElementById("date").valueAsDate = new Date();
 
   function getCSRFToken() {
       return document.querySelector('[name=csrfmiddlewaretoken]').value;
@@ -68,9 +82,49 @@
     date:date
   }, {
         headers: {
-            'X-CSRFToken': getCSRFToken() // Include CSRF Token
+            'X-CSRFToken': getCSRFToken() 
         }
     })
+    document.getElementById("input").value = "";
     window.location.reload()
   }
+
+  function taskDone(id){
+    axios.post('/taskDone/',{
+    sino:id
+       }, {
+        headers: {
+            'X-CSRFToken': getCSRFToken() 
+        }
+      })
+    window.location.reload()
+  }
+
+
+
+    function taskUndone(id){
+    axios.post('/taskUndone/',{
+    sino:id
+       }, {
+        headers: {
+            'X-CSRFToken': getCSRFToken() 
+        }
+      })
+    window.location.reload()
+
+  }
+
+  function taskDelete(id){
+    axios.post('/taskDelete/',{
+      sino:id
+    },
+      {
+        headers:{
+          'X-CSRFToken': getCSRFToken() 
+        }
+      } )
+      window.location.reload()
+
+  }
+
 </script>

@@ -29,5 +29,28 @@ def addTask(request):
 
         return HttpResponse(body)
         
-        
-        
+def taskDone(request):
+  if request.method == "POST":
+    body = json.loads(request.body.decode('utf-8'))
+    sino = body.get('sino')
+    doneTask = TaskModel.objects.get(sino = sino )
+    doneTask.done = True
+    doneTask.save()
+    print("doneTask:::::: ",doneTask.done)
+
+def taskUndone(request):
+  if request.method == "POST":
+    body = json.loads(request.body.decode('utf-8'))
+    sino = body.get('sino')
+    doneTask = TaskModel.objects.get(sino = sino )
+    doneTask.done = False
+    doneTask.save()
+    print("doneunTask:::::: ",doneTask.done)
+
+
+def taskDelete(request):
+  if request.method == "POST":
+    body = json.loads(request.body.decode('utf-8'))
+    sino = body.get('sino')
+    task = TaskModel.objects.get(sino = sino)
+    task.delete()
