@@ -12,7 +12,6 @@ def home(request):
     'data':data
   }
 
-  print(data_dict)
   
   return render(request,"home.html",data_dict)
 
@@ -20,13 +19,13 @@ def homeDate(request):
 
   if request.method  == "POST":
     body = json.loads(request.body.decode('utf-8'))
+    print("haiiiiiii")
     date = body.get('date')
     tasks = TaskModel.objects.filter(date=date)
     data = []
-
+    data_dict ={}
 
     for i in tasks:
-      print(i.date)
       obj = {
         "task":i.task,
         "date":i.date,
@@ -34,12 +33,13 @@ def homeDate(request):
         "sino":i.sino
       }
       data.append(obj)
-      data_dict = {
-        'data':data
-      }
-      
+    data_dict = {
+      'data':data
+    }
+    print("Data to be rendered:", data_dict)
+          
+    return render(request,"dateHome.html",data_dict)
 
-  return render(request,"home.html",data_dict)
 
     
       
