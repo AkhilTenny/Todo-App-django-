@@ -6,5 +6,6 @@ urlpatterns=[
   path('addTask/',views.addTask),
   path('taskDone/',views.taskDone),
   path('taskUndone/',views.taskUndone),
-  path('taskDelete/',views.taskDelete)
+  path('taskDelete/',views.taskDelete),
+  path('homeDate/',views.homeDate)
 ]
