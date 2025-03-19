@@ -35,26 +35,11 @@
       <button id="search" onclick="changeDate()">search</button>
     </div>
     <div class="mt-4">
-        {% for x in data %}
-        <div class="d-flex justify-content-between align-items-center p-2 border rounded bg-light my-2">
-          {%if x.done %}
-            <h5 class="mb-0 line-through">{{ x.task}}</h5>
-            <h6 class="text-muted mb-0">{{ x.date }}</h6>
-            <div>
-              <button onclick="taskUndone('{{ x.sino }}')" class="btn btn-sm btn-success done">&#10004;</button>
-              <button onclick="taskDelete('{{x.sino}}')" class="btn btn-sm btn-danger delete">✗</button>
-          </div>
-            {% else %}
-            <h5 class="mb-0">{{ x.task }}</h5>
-            <h6 class="text-muted mb-0">{{ x.date }}</h6>
-            <div>
-              <button onclick="taskDone('{{ x.sino }}')" class="btn btn-sm btn-success done">&#10004;</button>
-              <button onclick="taskDelete('{{x.sino}}')" class="btn btn-sm btn-danger delete">✗</button>
-          </div>
-            {% endif %}
-            
-        </div>
-        {% endfor %}
+        
+    </div>
+
+    <div id="taskContainer">
+
     </div>
 </div>
 
@@ -64,19 +49,86 @@
 
 
 <script>
+  function getCSRFToken() {
+      return document.querySelector('[name=csrfmiddlewaretoken]').value;
+  }
 
   document.getElementById("date").valueAsDate = new Date();
   document.getElementById("day").valueAsDate = new Date();
 
 
-  function getCSRFToken() {
-      return document.querySelector('[name=csrfmiddlewaretoken]').value;
-  }
+  axios.get('/getTasks/').then(res=>{
+    printTasks(res.data.data);
+    
+  })
+
+
+  function changeDate() {
+    const date = document.getElementById('day').value;
+
+    axios.post('/getTasksOfDate/', { date: date }, {  // Send date in the request body
+        headers: {
+            'X-CSRFToken': getCSRFToken(),  // Include CSRF token
+            'Content-Type': 'application/json'  // Ensure JSON content type
+        }
+    })
+    .then(res => {
+        printTasks(res.data.data);
+    })
+    .catch(error => {
+        console.error('Error fetching tasks:', error);
+    });
+}
+
+
+  function printTasks(tasks){
+   
+            let taskContainer = document.getElementById('taskContainer');
+            taskContainer.innerHTML = ''; 
+            console.log(tasks.data)
+            tasks.forEach(task => {
+                console.log("task")
+                const taskDiv = document.createElement('div');
+                taskDiv.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'p-2', 'border', 'rounded', 'bg-light', 'my-2');
+
+                const taskText = document.createElement('h5');
+                taskText.classList.add('mb-0');
+                if (task.done) taskText.classList.add('line-through');
+                taskText.textContent = task.task;
+
+                const taskDate = document.createElement('h6');
+                taskDate.classList.add('text-muted', 'mb-0');
+                taskDate.textContent = task.date;
+
+                const buttonContainer = document.createElement('div');
+
+                const toggleButton = document.createElement('button');
+                toggleButton.classList.add('btn', 'btn-sm', 'btn-success', 'done');
+                toggleButton.innerHTML = '&#10004;';
+                toggleButton.onclick = () => toggleTaskStatus(task.sino);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.classList.add('btn', 'btn-sm', 'btn-danger', 'delete');
+                deleteButton.innerHTML = '✗';
+                deleteButton.onclick = () => taskDelete(task.sino);
+
+                buttonContainer.appendChild(toggleButton);
+                buttonContainer.appendChild(deleteButton);
+
+                taskDiv.appendChild(taskText);
+                taskDiv.appendChild(taskDate);
+                taskDiv.appendChild(buttonContainer);
+
+                taskContainer.appendChild(taskDiv);
+  })}
+
+
+
+
 
 
   function addTask(){
 
-    console.log("ahi")
     
     const input = document.getElementById("input").value;
     const date = document.getElementById("date").value;
@@ -95,7 +147,7 @@
     window.location.reload()
   }
 
-  function taskDone(id){
+  function toggleTaskStatus(id){
     axios.post('/taskDone/',{
     sino:id
        }, {
@@ -133,17 +185,6 @@
 
   }
 
-  function changeDate(){
-    const date = document.getElementById('day').value;
-    axios.post('/homeDate/',{
-      date:date
-    },
-      {
-        headers:{
-          'X-CSRFToken': getCSRFToken() 
-        }
-      }
-  )
-  }
+
 
 </script>

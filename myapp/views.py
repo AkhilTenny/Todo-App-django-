@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 import json
 from .models import TaskModel
 
@@ -15,11 +15,19 @@ def home(request):
   
   return render(request,"home.html",data_dict)
 
-def homeDate(request):
 
+
+def getTasks(request):
+  if request.method == "GET":
+    data = list(TaskModel.objects.all().values())  # Convert QuerySet to list
+    return JsonResponse({"data": data}, safe=False) 
+      
+
+     
+
+def getTasksOfDate(request):
   if request.method  == "POST":
     body = json.loads(request.body.decode('utf-8'))
-    print("haiiiiiii")
     date = body.get('date')
     tasks = TaskModel.objects.filter(date=date)
     data = []
@@ -36,17 +44,11 @@ def homeDate(request):
     data_dict = {
       'data':data
     }
-    print("Data to be rendered:", data_dict)
-          
-    return render(request,"dateHome.html",data_dict)
-
+    return JsonResponse({"data": data}, safe=False) 
 
     
-      
-
-     
-
-
+          
+    
 
 
 
